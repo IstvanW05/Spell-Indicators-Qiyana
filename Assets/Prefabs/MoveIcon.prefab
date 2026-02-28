@@ -124,4 +124,4 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 3af76221e590b1a4fa5fe528a3521c68, type: 3}
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::IconKillTimer
-  killTime: 0.2
+  killTime: 0.4
