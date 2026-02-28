@@ -144,7 +144,7 @@ public class Abilitiies : MonoBehaviour
 
             if (Physics.Raycast(ray, out hit, Mathf.Infinity, layerMask))
             {
-                if (hit.collider.gameObject != this.gameObject) // Change later for element gathering
+                if (hit.collider.gameObject != this.gameObject)
                 {
                     position = hit.point;
                 }
@@ -156,7 +156,7 @@ public class Abilitiies : MonoBehaviour
             ability2Canvas.transform.rotation = Quaternion.Lerp(ab2Canvas, ability2Canvas.transform.rotation.normalized, 0);
 
             // Target Indication
-            Vector3 flatDir = hit.point - transform.position;
+            Vector3 flatDir = hit.point - transform.position;       // Flatten the direction vector to ignore vertical differences
             flatDir.y = 0; // remove vertical influence
             flatDir.Normalize();
 
