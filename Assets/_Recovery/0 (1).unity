@@ -512,7 +512,7 @@ GameObject:
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
-  m_IsActive: 0
+  m_IsActive: 1
 --- !u!114 &437203252
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -568,7 +568,7 @@ RectTransform:
   m_AnchorMin: {x: 0.5, y: 0.5}
   m_AnchorMax: {x: 0.5, y: 0.5}
   m_AnchoredPosition: {x: 0, y: -0.45}
-  m_SizeDelta: {x: 6, y: 4}
+  m_SizeDelta: {x: 10, y: 10}
   m_Pivot: {x: 0.5, y: 0}
 --- !u!1 &441238505
 GameObject:
@@ -996,7 +996,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 32a7de5f34d446048addadebb5c7b94a, type: 3}
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::TerrainElementVolume
-  elementType: 3
+  elementType: 2
 --- !u!65 &677370470
 BoxCollider:
   m_ObjectHideFlags: 0
@@ -1327,6 +1327,39 @@ RectTransform:
   m_AnchoredPosition: {x: 130.5, y: 60}
   m_SizeDelta: {x: 75, y: 75}
   m_Pivot: {x: 0.5, y: 0.5}
+--- !u!1 &811155638
+GameObject:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  serializedVersion: 6
+  m_Component:
+  - component: {fileID: 811155639}
+  m_Layer: 0
+  m_Name: Ability 2
+  m_TagString: Untagged
+  m_Icon: {fileID: 0}
+  m_NavMeshLayer: 0
+  m_StaticEditorFlags: 0
+  m_IsActive: 1
+--- !u!4 &811155639
+Transform:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 811155638}
+  serializedVersion: 2
+  m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
+  m_LocalPosition: {x: 0, y: 0, z: 0}
+  m_LocalScale: {x: 1, y: 1, z: 1}
+  m_ConstrainProportionsScale: 0
+  m_Children:
+  - {fileID: 1736547981}
+  - {fileID: 1927653315}
+  m_Father: {fileID: 947087392}
+  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
 --- !u!1 &839559799
 GameObject:
   m_ObjectHideFlags: 0
@@ -1739,8 +1772,7 @@ Transform:
   m_Children:
   - {fileID: 1300986937}
   - {fileID: 967428574}
-  - {fileID: 1736547981}
-  - {fileID: 1927653315}
+  - {fileID: 811155639}
   - {fileID: 1578381926}
   - {fileID: 616094241}
   m_Father: {fileID: 0}
@@ -1823,12 +1855,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 3871ae6c44b457a4ea87b800ec90f33d, type: 3}
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::Abilitiies
-  abilityDefault: {fileID: 21300000, guid: 5b01edff75ef38b48bcdb03e2c1bd722, type: 3}
-  abilityEarth: {fileID: 21300000, guid: 816804c9d39341a48bb250d45d83d04f, type: 3}
-  abilityRiver: {fileID: 21300000, guid: b85e98173ef5c854489e7eaa0b3f9b1c, type: 3}
-  abilityBush: {fileID: 21300000, guid: e36bdbacffe51c7488418c626bae00b4, type: 3}
-  abilityImage1: {fileID: 915739612}
-  abilityImage1Greyed: {fileID: 1757357977}
+  abilityImage1: {fileID: 1757357977}
   abilityText1: {fileID: 1278705032}
   ability1Action:
     m_Name: Ability 1
@@ -1842,8 +1869,7 @@ MonoBehaviour:
   ability1Cooldown: 5
   ability1Canvas: {fileID: 967428577}
   ability1Skillshot: {fileID: 437203252}
-  ability1EmpoweredSkillshot: {fileID: 1051709244}
-  abilityImage2Greyed: {fileID: 500641658}
+  abilityImage2: {fileID: 500641658}
   abilityText2: {fileID: 1867801204}
   ability2Action:
     m_Name: Ability 2
@@ -1864,8 +1890,8 @@ MonoBehaviour:
   ability2TargetRange: 3.75
   maxHopDistance: 6
   hopHeight: 2
-  hopSpeed: 2
-  abilityImage3Greyed: {fileID: 264223187}
+  hopSpeed: 1
+  abilityImage3: {fileID: 264223187}
   abilityText3: {fileID: 716782999}
   ability3Action:
     m_Name: Ability 3
@@ -1881,7 +1907,7 @@ MonoBehaviour:
   ability3RangeIndicator: {fileID: 1062403458}
   ability3DashIndicator: {fileID: 286403122}
   maxAbility3Range: 5
-  ultimateAbilityImageGreyed: {fileID: 879901219}
+  ultimateAbilityImage: {fileID: 879901219}
   ultimateAbilityText: {fileID: 1515957601}
   ultimateAbilityAction:
     m_Name: Ultimate Ability
@@ -1897,7 +1923,7 @@ MonoBehaviour:
   ultimateAbilitySkillshot: {fileID: 1832718157}
   terrainMask:
     serializedVersion: 2
-    m_Bits: 640
+    m_Bits: 128
   groundMask:
     serializedVersion: 2
     m_Bits: 256
@@ -1913,7 +1939,6 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 8cf34089f6fafb94a878bdf92b6b89c4, type: 3}
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::QiController
-  agent: {fileID: 0}
 --- !u!1 &954912060
 GameObject:
   m_ObjectHideFlags: 0
@@ -2079,7 +2104,7 @@ GameObject:
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
-  m_IsActive: 1
+  m_IsActive: 0
 --- !u!224 &967428574
 RectTransform:
   m_ObjectHideFlags: 0
@@ -2093,7 +2118,6 @@ RectTransform:
   m_ConstrainProportionsScale: 0
   m_Children:
   - {fileID: 437203254}
-  - {fileID: 1051709243}
   m_Father: {fileID: 947087392}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
   m_AnchorMin: {x: 0, y: 0}
@@ -2211,7 +2235,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 32a7de5f34d446048addadebb5c7b94a, type: 3}
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::TerrainElementVolume
-  elementType: 2
+  elementType: 1
 --- !u!65 &969878111
 BoxCollider:
   m_ObjectHideFlags: 0
@@ -2289,81 +2313,6 @@ MeshFilter:
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 969878108}
   m_Mesh: {fileID: 10202, guid: 0000000000000000e000000000000000, type: 0}
---- !u!1 &1051709242
-GameObject:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  serializedVersion: 6
-  m_Component:
-  - component: {fileID: 1051709243}
-  - component: {fileID: 1051709245}
-  - component: {fileID: 1051709244}
-  m_Layer: 0
-  m_Name: Ability 1 Empowered Skillshot Image
-  m_TagString: Untagged
-  m_Icon: {fileID: 0}
-  m_NavMeshLayer: 0
-  m_StaticEditorFlags: 0
-  m_IsActive: 0
---- !u!224 &1051709243
-RectTransform:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 1051709242}
-  m_LocalRotation: {x: 0.7071068, y: 0, z: 0, w: 0.7071068}
-  m_LocalPosition: {x: 0, y: 0, z: 0}
-  m_LocalScale: {x: 1, y: 1, z: 0.01}
-  m_ConstrainProportionsScale: 0
-  m_Children: []
-  m_Father: {fileID: 967428574}
-  m_LocalEulerAnglesHint: {x: 90, y: 0, z: 0}
-  m_AnchorMin: {x: 0.5, y: 0.5}
-  m_AnchorMax: {x: 0.5, y: 0.5}
-  m_AnchoredPosition: {x: 0, y: -0.45}
-  m_SizeDelta: {x: 6, y: 8.25}
-  m_Pivot: {x: 0.5, y: 0}
---- !u!114 &1051709244
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 1051709242}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: fe87c0e1cc204ed48ad3b37840f39efc, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: UnityEngine.UI::UnityEngine.UI.Image
-  m_Material: {fileID: 0}
-  m_Color: {r: 1, g: 1, b: 1, a: 1}
-  m_RaycastTarget: 1
-  m_RaycastPadding: {x: 0, y: 0, z: 0, w: 0}
-  m_Maskable: 1
-  m_OnCullStateChanged:
-    m_PersistentCalls:
-      m_Calls: []
-  m_Sprite: {fileID: 21300000, guid: edcc6755a9848ff4ab6f1e33137f4e3a, type: 3}
-  m_Type: 0
-  m_PreserveAspect: 0
-  m_FillCenter: 1
-  m_FillMethod: 4
-  m_FillAmount: 1
-  m_FillClockwise: 1
-  m_FillOrigin: 0
-  m_UseSpriteMesh: 0
-  m_PixelsPerUnitMultiplier: 1
---- !u!222 &1051709245
-CanvasRenderer:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 1051709242}
-  m_CullTransparentMesh: 1
 --- !u!1 &1057145153
 GameObject:
   m_ObjectHideFlags: 0
@@ -2735,7 +2684,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 32a7de5f34d446048addadebb5c7b94a, type: 3}
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::TerrainElementVolume
-  elementType: 1
+  elementType: 0
 --- !u!23 &1143844110
 MeshRenderer:
   m_ObjectHideFlags: 0
@@ -3438,7 +3387,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 32a7de5f34d446048addadebb5c7b94a, type: 3}
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::TerrainElementVolume
-  elementType: 3
+  elementType: 2
 --- !u!65 &1592883946
 BoxCollider:
   m_ObjectHideFlags: 0
@@ -3529,7 +3478,7 @@ GameObject:
   - component: {fileID: 1736547983}
   - component: {fileID: 1736547982}
   m_Layer: 0
-  m_Name: Ability 2 Range Indicator Canvas
+  m_Name: Ability 2 Range Indicator Canvas (1)
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
@@ -3549,7 +3498,7 @@ RectTransform:
   m_Children:
   - {fileID: 441238506}
   - {fileID: 401478400}
-  m_Father: {fileID: 947087392}
+  m_Father: {fileID: 811155639}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
   m_AnchorMin: {x: 0, y: 0}
   m_AnchorMax: {x: 0, y: 0}
@@ -4035,7 +3984,7 @@ GameObject:
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
-  m_IsActive: 0
+  m_IsActive: 1
 --- !u!224 &1927653315
 RectTransform:
   m_ObjectHideFlags: 0
@@ -4049,7 +3998,7 @@ RectTransform:
   m_ConstrainProportionsScale: 0
   m_Children:
   - {fileID: 849255945}
-  m_Father: {fileID: 947087392}
+  m_Father: {fileID: 811155639}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
   m_AnchorMin: {x: 0, y: 0}
   m_AnchorMax: {x: 0, y: 0}
