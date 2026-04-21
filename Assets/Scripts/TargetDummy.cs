@@ -44,7 +44,7 @@ public class TargetDummy : MonoBehaviour
         if (health > maxHealth) health = maxHealth;
         if (health < 0) health = 0;
 
-        Debug.Log($"Target Dummy health: {health}");
+        //Debug.Log($"Target Dummy health: {health}");
     }
 
     public void ResetHealth()
