@@ -281,7 +281,7 @@ GameObject:
   - component: {fileID: 286403124}
   - component: {fileID: 286403123}
   - component: {fileID: 286403122}
-  m_Layer: 10
+  m_Layer: 0
   m_Name: Ability 3 Dash Indicator Image
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -356,7 +356,7 @@ GameObject:
   - component: {fileID: 401478400}
   - component: {fileID: 401478399}
   - component: {fileID: 401478398}
-  m_Layer: 10
+  m_Layer: 0
   m_Name: 'Ability 2 Jump Indicator Image '
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -506,7 +506,7 @@ GameObject:
   - component: {fileID: 437203254}
   - component: {fileID: 437203253}
   - component: {fileID: 437203252}
-  m_Layer: 10
+  m_Layer: 0
   m_Name: Ability 1 Skillshot Image
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -581,7 +581,7 @@ GameObject:
   - component: {fileID: 441238506}
   - component: {fileID: 441238507}
   - component: {fileID: 441238508}
-  m_Layer: 10
+  m_Layer: 0
   m_Name: Ability 2 Range Indicator Image
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -859,7 +859,7 @@ GameObject:
   - component: {fileID: 616094244}
   - component: {fileID: 616094243}
   - component: {fileID: 616094242}
-  m_Layer: 10
+  m_Layer: 0
   m_Name: Ultimate Ability Skillshot Canvas
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -1428,7 +1428,7 @@ GameObject:
   - component: {fileID: 849255945}
   - component: {fileID: 849255947}
   - component: {fileID: 849255946}
-  m_Layer: 10
+  m_Layer: 0
   m_Name: Ability 2 Target Indicator Image
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -1656,10 +1656,11 @@ GameObject:
   - component: {fileID: 947087389}
   - component: {fileID: 947087395}
   - component: {fileID: 947087394}
+  - component: {fileID: 947087398}
   - component: {fileID: 947087393}
   - component: {fileID: 947087397}
   - component: {fileID: 947087396}
-  m_Layer: 10
+  m_Layer: 0
   m_Name: Player
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -1780,7 +1781,6 @@ MonoBehaviour:
   m_EditorClassIdentifier: Assembly-CSharp::PlayerMove
   mainCam: {fileID: 1057145155}
   moveIcon: {fileID: 7908369525540237307, guid: 47d4bb5af5573b1458a044a3d2ba32f3, type: 3}
-  attackRange: 2
 --- !u!195 &947087394
 NavMeshAgent:
   m_ObjectHideFlags: 0
@@ -1865,6 +1865,7 @@ MonoBehaviour:
   ability1Canvas: {fileID: 967428577}
   ability1Skillshot: {fileID: 437203252}
   ability1EmpoweredSkillshot: {fileID: 1051709244}
+  ability1ProjectilePrefab: {fileID: 9222720073864166322, guid: 41ac94b553e47cf4fa6f06f2c5b80fd8, type: 3}
   abilityImage2Greyed: {fileID: 500641658}
   abilityText2: {fileID: 1867801204}
   ability2Action:
@@ -1936,6 +1937,24 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::QiController
   agent: {fileID: 0}
+--- !u!114 &947087398
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 947087388}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: de7f9f08e3b33904aab4851275d10167, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::PlayerStats
+  isBlue: 1
+  maxHealth: 100
+  currentHealth: 0
+  attackDamage: 60
+  attackRange: 2
+  attackSpeed: 1
 --- !u!1 &954912060
 GameObject:
   m_ObjectHideFlags: 0
@@ -2095,7 +2114,7 @@ GameObject:
   - component: {fileID: 967428577}
   - component: {fileID: 967428576}
   - component: {fileID: 967428575}
-  m_Layer: 10
+  m_Layer: 0
   m_Name: Ability 1 Skillshot Canvas
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -2433,7 +2452,7 @@ GameObject:
   - component: {fileID: 1051709243}
   - component: {fileID: 1051709245}
   - component: {fileID: 1051709244}
-  m_Layer: 10
+  m_Layer: 0
   m_Name: Ability 1 Empowered Skillshot Image
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -2661,7 +2680,7 @@ GameObject:
   - component: {fileID: 1062403456}
   - component: {fileID: 1062403457}
   - component: {fileID: 1062403458}
-  m_Layer: 10
+  m_Layer: 0
   m_Name: Ability 3 Range Indicator Image
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -3073,7 +3092,7 @@ GameObject:
   - component: {fileID: 1300986940}
   - component: {fileID: 1300986939}
   - component: {fileID: 1300986938}
-  m_Layer: 10
+  m_Layer: 0
   m_Name: Cube
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -3361,8 +3380,9 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::TargetDummy
   maxHealth: 500
-  health: 0
-  resetTime: 5
+  currentHealth: 0
+  resetTime: 100
+  isRooted: 0
 --- !u!1 &1515957599
 GameObject:
   m_ObjectHideFlags: 0
@@ -3586,7 +3606,7 @@ GameObject:
   - component: {fileID: 1578381929}
   - component: {fileID: 1578381928}
   - component: {fileID: 1578381927}
-  m_Layer: 10
+  m_Layer: 0
   m_Name: Ability 3 Range Indicator Canvas
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -3835,7 +3855,7 @@ GameObject:
   - component: {fileID: 1736547984}
   - component: {fileID: 1736547983}
   - component: {fileID: 1736547982}
-  m_Layer: 10
+  m_Layer: 0
   m_Name: Ability 2 Range Indicator Canvas
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -4124,7 +4144,7 @@ GameObject:
   - component: {fileID: 1832718159}
   - component: {fileID: 1832718158}
   - component: {fileID: 1832718157}
-  m_Layer: 10
+  m_Layer: 0
   m_Name: Ultimate Skillshot Image
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -4336,7 +4356,7 @@ GameObject:
   - component: {fileID: 1927653318}
   - component: {fileID: 1927653317}
   - component: {fileID: 1927653316}
-  m_Layer: 10
+  m_Layer: 0
   m_Name: Ability 2 Target Indicator Canvas
   m_TagString: Untagged
   m_Icon: {fileID: 0}
