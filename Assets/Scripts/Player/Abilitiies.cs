@@ -7,7 +7,12 @@ using UnityEngine.UI;
 public class Abilitiies : MonoBehaviour
 {
     private PlayerInput playerInput;
+    private PlayerScript playerScript;
+    private PlayerStats playerStats;
     private QiController qiController;
+
+    private Vector3 aimDir;
+    private Quaternion aimRot;
 
     #region Ability-1
     [Header("Ability 1")]
@@ -25,6 +30,8 @@ public class Abilitiies : MonoBehaviour
     public Canvas ability1Canvas;
     public Image ability1Skillshot;
     public Image ability1EmpoweredSkillshot;
+
+    public GameObject ability1ProjectilePrefab;
 
     bool isEmpowered = false;
     bool isAbility1OnCooldown = false;
@@ -99,6 +106,8 @@ public class Abilitiies : MonoBehaviour
     private void Awake()
     {
         playerInput = GetComponent<PlayerInput>();
+        playerScript = GetComponent<PlayerScript>();
+        playerStats = GetComponent<PlayerStats>();
         qiController = GetComponent<QiController>();
 
         ability1Action = playerInput.actions["Ability 1"];
@@ -130,7 +139,7 @@ public class Abilitiies : MonoBehaviour
     {
         ray = Camera.main.ScreenPointToRay(Mouse.current.position.ReadValue());
 
-        Ability1Input();
+        StartCoroutine(Ability1Input());
         Ability2Input();
         Ability3Input();
         UltimateAbilityInput();
@@ -154,6 +163,8 @@ public class Abilitiies : MonoBehaviour
             if (Physics.Raycast(ray, out hit, Mathf.Infinity))
             {
                 position = new Vector3(hit.point.x, hit.point.y, hit.point.z);
+                
+                GetAimDirection(position);
             }
 
             Quaternion ab1Canvas = Quaternion.LookRotation(position - transform.position);
@@ -163,7 +174,7 @@ public class Abilitiies : MonoBehaviour
         }
     }
 
-    void Ability1Input()
+    IEnumerator Ability1Input()
     {
         int i = 1;
 
@@ -185,7 +196,12 @@ public class Abilitiies : MonoBehaviour
                 //Debug.Log("Ability 1 Activated!");
                 if(currentElement != ElementType.None)
                 {
-                    Debug.Log("Ability 1 was empowored with the element: " + currentElement);
+                    //Debug.Log("Ability 1 was empowered with the element: " + currentElement);
+
+                    yield return StartCoroutine(playerScript.WaitTillLanded());
+
+                    Instantiate(ability1ProjectilePrefab, transform.position + Vector3.forward, aimRot).GetComponent<EdgeOfIxtalProjectile>().Initialize(playerStats.isBlue, currentElement, playerStats.attackDamage);
+
                     currentElement = ElementType.None;
                     isEmpowered = false;
                     abilityImage1.sprite = abilityDefault;
@@ -194,6 +210,7 @@ public class Abilitiies : MonoBehaviour
                 currentCooldown1 = ability1Cooldown;
             }
         }
+        yield break;
     }
     #endregion
     #region Ability-2-Methods
@@ -575,4 +592,16 @@ public class Abilitiies : MonoBehaviour
         }
         return false;
     }
+
+    Quaternion GetAimDirection(Vector3 mouseLocation)
+    {
+
+        aimDir = position - transform.position;
+        aimDir.y = 0f;
+        aimDir.Normalize();
+
+        aimRot = Quaternion.LookRotation(aimDir, Vector3.up);
+        return aimRot;
+    }
+
 }

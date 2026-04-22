@@ -1,22 +1,25 @@
+using System.Collections;
 using UnityEngine;
 using UnityEngine.AI;
 
 public class TargetDummy : MonoBehaviour
 {
     public int maxHealth = 500;
-    public int health;
+    public int currentHealth;
 
     public float resetTime = 5f;
     private float resetTimer;
 
     private NavMeshAgent agent;
 
-
     bool isBlue;
+
+    public bool isRooted = false;
+    float rootDuration = 3f;
 
     void Start()
     {
-        health = maxHealth;
+        currentHealth = maxHealth;
         agent = GetComponent<NavMeshAgent>();
 
         SnapToMesh();
@@ -25,7 +28,7 @@ public class TargetDummy : MonoBehaviour
 
     private void FixedUpdate()
     {
-        if (health < maxHealth)
+        if (currentHealth < maxHealth)
         {
             resetTimer -= Time.fixedDeltaTime;
 
@@ -37,19 +40,29 @@ public class TargetDummy : MonoBehaviour
         }
     }
 
+    public IEnumerator RootCoroutine()
+    {
+        //Debug.Log("Target Dummy rooted for " + rootDuration + " seconds.");
+        isRooted = true;
+        agent.enabled = false;
+        yield return new WaitForSeconds(rootDuration);
+        isRooted = false;
+        agent.enabled = true;
+    }
+
     public void ChangeHealth(int amount)
     {
-        health += amount;
+        currentHealth += amount;
 
-        if (health > maxHealth) health = maxHealth;
-        if (health < 0) health = 0;
+        if (currentHealth > maxHealth) currentHealth = maxHealth;
+        if (currentHealth < 0) currentHealth = 0;
 
-        //Debug.Log($"Target Dummy health: {health}");
+        //Debug.Log($"Target Dummy took {amount} damage, currentHealth: {currentHealth}");
     }
 
     public void ResetHealth()
     {
-        health = maxHealth;
+        currentHealth = maxHealth;
     }
 
     private void SnapToMesh()

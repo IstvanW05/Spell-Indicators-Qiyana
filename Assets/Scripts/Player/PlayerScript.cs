@@ -6,16 +6,15 @@ using UnityEngine.InputSystem;
 public class PlayerScript : MonoBehaviour
 {
     private PlayerInput playerInput;
+    private PlayerStats playerStats;
     public Camera mainCam;
 
     public GameObject moveIcon;
 
-    public float attackRange = 2.0f;
-
     bool hasTarget = false;
     bool moveInputWasPressed = false;
 
-    int layerGround = 8, BluePlayer = 10, RedPlayer = 11;
+    readonly int layerGround = 8, BluePlayer = 10, RedPlayer = 11;
 
     GameObject target;
     NavMeshAgent agent;
@@ -24,9 +23,10 @@ public class PlayerScript : MonoBehaviour
     private void Start()
     {
         playerInput = GetComponent<PlayerInput>();
+        playerStats = GetComponent<PlayerStats>();
         agent = GetComponent<NavMeshAgent>();
 
-        agent.stoppingDistance = attackRange;
+        agent.stoppingDistance = playerStats.attackRange;
 
         moveToClick = playerInput.actions["MoveToClick"];
         StartCoroutine(ClickToMoveLoop());
@@ -72,7 +72,7 @@ public class PlayerScript : MonoBehaviour
             }
             if (hasTarget && target != null)
             {
-                if (Vector3.Distance(transform.position, target.transform.position) <= attackRange)
+                if (Vector3.Distance(transform.position, target.transform.position) <= playerStats.attackRange)
                 {
                     // In attack range
                     Debug.Log("Attacking " + target.name);
@@ -87,5 +87,10 @@ public class PlayerScript : MonoBehaviour
 
             yield return null;
         }
+    }
+
+    public IEnumerator WaitTillLanded()
+    {
+        yield return new WaitUntil(() => agent.enabled && agent.isOnNavMesh);
     }
 }
