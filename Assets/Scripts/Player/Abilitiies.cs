@@ -31,6 +31,8 @@ public class Abilitiies : MonoBehaviour
     public Image ability1Skillshot;
     public Image ability1EmpoweredSkillshot;
 
+    public GameObject ability1Hitbox;
+    public float ability1HitboxDuration;
     public GameObject ability1ProjectilePrefab;
 
     bool isEmpowered = false;
@@ -132,6 +134,11 @@ public class Abilitiies : MonoBehaviour
         abilityText2.text = string.Empty;
         abilityText3.text = string.Empty;
         ultimateAbilityText.text = string.Empty;
+
+        var setAbility1Hitbox = ability1Hitbox.GetComponent<SingleTickDamage>();
+        setAbility1Hitbox.playerStats = playerStats;
+        setAbility1Hitbox.Initialize();
+
     }
 
     // Update is called once per frame
@@ -194,7 +201,15 @@ public class Abilitiies : MonoBehaviour
             if (!isAbility1OnCooldown && ability1Canvas.enabled)
             {
                 //Debug.Log("Ability 1 Activated!");
-                if(currentElement != ElementType.None)
+                if (currentElement == ElementType.None)
+                {
+                    yield return StartCoroutine(playerScript.WaitTillLanded());
+                    ability1Hitbox.SetActive(true);
+                    yield return new WaitForSeconds(ability1HitboxDuration);
+                    ability1Hitbox.SetActive(false);
+
+                }
+                else
                 {
                     //Debug.Log("Ability 1 was empowered with the element: " + currentElement);
 

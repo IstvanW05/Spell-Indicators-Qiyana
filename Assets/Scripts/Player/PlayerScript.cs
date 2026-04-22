@@ -37,6 +37,8 @@ public class PlayerScript : MonoBehaviour
     }
     private IEnumerator ClickToMoveLoop()
     {
+        LayerMask ignoreLayer = ~LayerMask.GetMask("Terrain");
+
         while (true)
         {
             // Wait until agent is valid
@@ -45,8 +47,9 @@ public class PlayerScript : MonoBehaviour
             if (moveInputWasPressed)
             {
                 Ray ray = mainCam.ScreenPointToRay(Mouse.current.position.ReadValue());
+                agent.stoppingDistance = 0f;
 
-                if (Physics.Raycast(ray, out RaycastHit hit))
+                if (Physics.Raycast(ray, out RaycastHit hit, Mathf.Infinity, ignoreLayer))
                 {
                     if (hit.collider.gameObject.layer == layerGround)
                     {
