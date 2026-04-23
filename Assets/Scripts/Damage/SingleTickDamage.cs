@@ -24,17 +24,15 @@ public class SingleTickDamage : MonoBehaviour
 
     void SetDamage()
     {
-        Debug.Log("DamageSet");
         this.damage = playerStats.attackDamage;
+        //Debug.Log("DamageSet: " + damage);
     }
 
     private void OnTriggerEnter(Collider other)
     {
-        Debug.Log("Triggered");
-
         if (other.gameObject.layer == targetLayer)
         {
-            Debug.Log("Projectile collided with target: " + other.gameObject.name);
+            //Debug.Log("Collided with target: " + other.gameObject.name);
 
             SetDamage();
 
@@ -44,7 +42,6 @@ public class SingleTickDamage : MonoBehaviour
 
                 targetStats.ChangeHealth(-damage);
             }
-            Destroy(gameObject);
         }
     }
 }

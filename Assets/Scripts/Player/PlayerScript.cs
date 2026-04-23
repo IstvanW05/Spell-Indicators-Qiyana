@@ -96,4 +96,10 @@ public class PlayerScript : MonoBehaviour
     {
         yield return new WaitUntil(() => agent.enabled && agent.isOnNavMesh);
     }
+
+    public void FaceAimDirection(Quaternion target)
+    {
+        //Debug.Log("Facing aim direction");
+        transform.rotation = target;
+    }
 }

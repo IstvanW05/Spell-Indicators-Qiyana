@@ -1725,6 +1725,7 @@ GameObject:
   - component: {fileID: 947087393}
   - component: {fileID: 947087397}
   - component: {fileID: 947087396}
+  - component: {fileID: 947087399}
   m_Layer: 0
   m_Name: Player
   m_TagString: Untagged
@@ -1858,7 +1859,7 @@ NavMeshAgent:
   m_Speed: 10
   m_Acceleration: 100
   avoidancePriority: 50
-  m_AngularSpeed: 1200
+  m_AngularSpeed: 1800
   m_StoppingDistance: 0
   m_AutoTraverseOffMeshLink: 1
   m_AutoBraking: 0
@@ -1930,7 +1931,7 @@ MonoBehaviour:
   ability1Skillshot: {fileID: 437203252}
   ability1EmpoweredSkillshot: {fileID: 1051709244}
   ability1Hitbox: {fileID: 1419764705}
-  ability1HitboxDuration: 0.2
+  ability1HitboxDuration: 2
   ability1ProjectilePrefab: {fileID: 9222720073864166322, guid: 41ac94b553e47cf4fa6f06f2c5b80fd8, type: 3}
   abilityImage2Greyed: {fileID: 500641658}
   abilityText2: {fileID: 1867801204}
@@ -2021,6 +2022,33 @@ MonoBehaviour:
   attackDamage: 60
   attackRange: 2
   attackSpeed: 1
+--- !u!54 &947087399
+Rigidbody:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 947087388}
+  serializedVersion: 5
+  m_Mass: 1
+  m_LinearDamping: 0
+  m_AngularDamping: 0.05
+  m_CenterOfMass: {x: 0, y: 0, z: 0}
+  m_InertiaTensor: {x: 1, y: 1, z: 1}
+  m_InertiaRotation: {x: 0, y: 0, z: 0, w: 1}
+  m_IncludeLayers:
+    serializedVersion: 2
+    m_Bits: 0
+  m_ExcludeLayers:
+    serializedVersion: 2
+    m_Bits: 0
+  m_ImplicitCom: 1
+  m_ImplicitTensor: 1
+  m_UseGravity: 0
+  m_IsKinematic: 0
+  m_Interpolate: 0
+  m_Constraints: 126
+  m_CollisionDetection: 0
 --- !u!1 &954912060
 GameObject:
   m_ObjectHideFlags: 0
@@ -3313,7 +3341,7 @@ GameObject:
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
-  m_IsActive: 0
+  m_IsActive: 1
 --- !u!4 &1419764706
 Transform:
   m_ObjectHideFlags: 0
@@ -3322,7 +3350,7 @@ Transform:
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 1419764705}
   serializedVersion: 2
-  m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
+  m_LocalRotation: {x: -0, y: -0, z: -0, w: 1}
   m_LocalPosition: {x: -0.018, y: 0, z: 2}
   m_LocalScale: {x: 1.2500465, y: 1, z: 3.9764085}
   m_ConstrainProportionsScale: 0
@@ -3385,6 +3413,7 @@ GameObject:
   - component: {fileID: 1448621960}
   - component: {fileID: 1448621959}
   - component: {fileID: 1448621964}
+  - component: {fileID: 1448621965}
   m_Layer: 11
   m_Name: Target Dummy
   m_TagString: Untagged
@@ -3525,6 +3554,33 @@ MonoBehaviour:
   currentHealth: 0
   resetTime: 100
   isRooted: 0
+--- !u!54 &1448621965
+Rigidbody:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1448621958}
+  serializedVersion: 5
+  m_Mass: 1
+  m_LinearDamping: 0
+  m_AngularDamping: 0.05
+  m_CenterOfMass: {x: 0, y: 0, z: 0}
+  m_InertiaTensor: {x: 1, y: 1, z: 1}
+  m_InertiaRotation: {x: 0, y: 0, z: 0, w: 1}
+  m_IncludeLayers:
+    serializedVersion: 2
+    m_Bits: 0
+  m_ExcludeLayers:
+    serializedVersion: 2
+    m_Bits: 0
+  m_ImplicitCom: 1
+  m_ImplicitTensor: 1
+  m_UseGravity: 0
+  m_IsKinematic: 0
+  m_Interpolate: 0
+  m_Constraints: 126
+  m_CollisionDetection: 0
 --- !u!1 &1515957599
 GameObject:
   m_ObjectHideFlags: 0

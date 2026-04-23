@@ -204,6 +204,7 @@ public class Abilitiies : MonoBehaviour
                 if (currentElement == ElementType.None)
                 {
                     yield return StartCoroutine(playerScript.WaitTillLanded());
+                    playerScript.FaceAimDirection(aimRot);
                     ability1Hitbox.SetActive(true);
                     yield return new WaitForSeconds(ability1HitboxDuration);
                     ability1Hitbox.SetActive(false);
@@ -214,7 +215,7 @@ public class Abilitiies : MonoBehaviour
                     //Debug.Log("Ability 1 was empowered with the element: " + currentElement);
 
                     yield return StartCoroutine(playerScript.WaitTillLanded());
-
+                    playerScript.FaceAimDirection(aimRot);
                     Instantiate(ability1ProjectilePrefab, transform.position + Vector3.forward, aimRot).GetComponent<EdgeOfIxtalProjectile>().Initialize(playerStats.isBlue, currentElement, playerStats.attackDamage);
 
                     currentElement = ElementType.None;
