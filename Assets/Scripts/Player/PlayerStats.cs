@@ -13,15 +13,19 @@ public class PlayerStats : MonoBehaviour
 
     public float attackSpeed = 1.0f; // number of attacks per second
 
+    public int targetLayer;
+
     private void Awake()
     {
         if (isBlue)
         {
             gameObject.layer = 10; // BluePlayer layer
+            targetLayer = 11;
         }
         else
         {
             gameObject.layer = 11; // RedPlayer layer
+            targetLayer = 10;
         }
     }
 }

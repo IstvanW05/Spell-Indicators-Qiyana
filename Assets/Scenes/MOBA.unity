@@ -1846,6 +1846,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: Assembly-CSharp::PlayerMove
   mainCam: {fileID: 1057145155}
   moveIcon: {fileID: 7908369525540237307, guid: 47d4bb5af5573b1458a044a3d2ba32f3, type: 3}
+  agent: {fileID: 0}
 --- !u!195 &947087394
 NavMeshAgent:
   m_ObjectHideFlags: 0
@@ -1970,7 +1971,8 @@ MonoBehaviour:
   ability3Canvas: {fileID: 1578381929}
   ability3RangeIndicator: {fileID: 1062403458}
   ability3DashIndicator: {fileID: 286403122}
-  maxAbility3Range: 5
+  maxAbility3Range: 10
+  dashDuration: 0.5
   ultimateAbilityImageGreyed: {fileID: 879901219}
   ultimateAbilityText: {fileID: 1515957601}
   ultimateAbilityAction:
@@ -1991,6 +1993,7 @@ MonoBehaviour:
   groundMask:
     serializedVersion: 2
     m_Bits: 256
+  target: {fileID: 0}
 --- !u!114 &947087397
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -2022,6 +2025,7 @@ MonoBehaviour:
   attackDamage: 60
   attackRange: 2
   attackSpeed: 1
+  targetLayer: 0
 --- !u!54 &947087399
 Rigidbody:
   m_ObjectHideFlags: 0
@@ -3341,7 +3345,7 @@ GameObject:
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
-  m_IsActive: 1
+  m_IsActive: 0
 --- !u!4 &1419764706
 Transform:
   m_ObjectHideFlags: 0

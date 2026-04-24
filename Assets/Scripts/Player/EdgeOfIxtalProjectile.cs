@@ -9,6 +9,7 @@ public class EdgeOfIxtalProjectile : MonoBehaviour
     public Material riverMaterial;
 
     private int baseDamage;
+    private int targetLayer;
 
     public float speed;
     public float lifetime;
@@ -28,12 +29,10 @@ public class EdgeOfIxtalProjectile : MonoBehaviour
         transform.Translate(Vector3.forward * speed * Time.fixedDeltaTime);
     }
 
-    public void Initialize(bool isBlue, ElementType elementType, int baseDamage)
+    public void Initialize(ElementType elementType, int baseDamage, int targetLayer)
     {
-        this.isBlue = isBlue;
         this.baseDamage = baseDamage;
-
-        //Debug.Log(isBlue ? "Blue Team Projectile created with base damage: " + baseDamage : "Red Team Projectile created with base damage: " + baseDamage);
+        this.targetLayer = targetLayer;
 
         ElementAttributes(elementType);
         Destroy(gameObject, lifetime);
@@ -41,7 +40,7 @@ public class EdgeOfIxtalProjectile : MonoBehaviour
 
     private void ElementAttributes(ElementType elementType)
     {
-        Debug.Log("Applying element attributes for: " + elementType.ToString());
+        //Debug.Log("Applying element attributes for: " + elementType.ToString());
 
         switch (elementType)
         {
@@ -64,14 +63,6 @@ public class EdgeOfIxtalProjectile : MonoBehaviour
 
     private void OnTriggerEnter(Collider other)
     {
-        LayerMask targetLayer;
-
-        if (isBlue)
-            targetLayer = 11; // Target red team layer
-        else
-            targetLayer = 10; // Target blue team layer
-
-
         if (other.gameObject.layer == targetLayer)
         {
             //Debug.Log("Projectile collided with target: " + other.gameObject.name);

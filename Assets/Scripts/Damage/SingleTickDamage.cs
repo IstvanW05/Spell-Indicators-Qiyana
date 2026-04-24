@@ -4,8 +4,6 @@ public class SingleTickDamage : MonoBehaviour
 {
     public PlayerStats playerStats;
 
-    bool isBlue;
-
     LayerMask targetLayer;
 
     int damage;
@@ -14,12 +12,7 @@ public class SingleTickDamage : MonoBehaviour
     {
         Debug.Log("Initialized");
 
-        isBlue = playerStats.isBlue;
-
-        if (isBlue)
-            targetLayer = 11; // Target red team layer
-        else
-            targetLayer = 10; // Target blue team layer
+        this.targetLayer = playerStats.targetLayer;
     }
 
     void SetDamage()

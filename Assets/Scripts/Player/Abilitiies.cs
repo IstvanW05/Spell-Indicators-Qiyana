@@ -1,5 +1,6 @@
 ﻿using System.Collections;
 using TMPro;
+using Unity.VisualScripting;
 using UnityEngine;
 using UnityEngine.InputSystem;
 using UnityEngine.TerrainUtils;
@@ -78,7 +79,10 @@ public class Abilitiies : MonoBehaviour
     public Canvas ability3Canvas;
     public Image ability3RangeIndicator;
     public Image ability3DashIndicator;
+
     public float maxAbility3Range = 5f;
+    public float dashDuration = 0.5f;
+    private bool isDashing = false;
 
     bool isAbility3OnCooldown = false;
     float currentCooldown3;
@@ -101,6 +105,11 @@ public class Abilitiies : MonoBehaviour
 
     [SerializeField] private LayerMask terrainMask;
     [SerializeField] private LayerMask groundMask;
+
+    public GameObject target;
+
+    public Coroutine currentCoroutine;
+    
     private Vector3 position;
     private RaycastHit hit;
     private Ray ray;
@@ -118,6 +127,7 @@ public class Abilitiies : MonoBehaviour
         ultimateAbilityAction = playerInput.actions["Ultimate"];
 
         ability1Canvas.gameObject.SetActive(false);
+        ability1Hitbox.SetActive(false);
         ability2Canvas.gameObject.SetActive(false);
         ability2TargetCanvas.gameObject.SetActive(false);
         ability3Canvas.gameObject.SetActive(false);
@@ -214,10 +224,11 @@ public class Abilitiies : MonoBehaviour
                 {
                     //Debug.Log("Ability 1 was empowered with the element: " + currentElement);
 
-                    yield return StartCoroutine(playerScript.WaitTillLanded());
+                    yield return currentCoroutine = StartCoroutine(playerScript.WaitTillLanded());
                     playerScript.FaceAimDirection(aimRot);
-                    Instantiate(ability1ProjectilePrefab, transform.position + Vector3.forward, aimRot).GetComponent<EdgeOfIxtalProjectile>().Initialize(playerStats.isBlue, currentElement, playerStats.attackDamage);
+                    Instantiate(ability1ProjectilePrefab, transform.position + Vector3.forward, aimRot).GetComponent<EdgeOfIxtalProjectile>().Initialize(currentElement, playerStats.attackDamage, playerStats.targetLayer);
 
+                    currentCoroutine = null;
                     currentElement = ElementType.None;
                     isEmpowered = false;
                     abilityImage1.sprite = abilityDefault;
@@ -460,25 +471,78 @@ public class Abilitiies : MonoBehaviour
     {
         int i = 3;
 
-        if (ability3Action.WasPressedThisFrame())
+        if (ability3Action.IsPressed())
         {
             SetActive(i);
             SetInactive(i);
             Cursor.visible = true;
 
             Debug.Log("Ability 3 Previewed!");
+
+            if (!isAbility3OnCooldown && Physics.Raycast(ray, out hit, Mathf.Infinity, playerStats.targetLayer))
+                target = hit.rigidbody.gameObject;
+  
         }
         if (ability3Action.WasReleasedThisFrame())
         {
             SetInactive(0);
 
-            if (ability3Canvas.enabled && !isAbility3OnCooldown)
+            // Set target for PlayerScript as well
+            // TODO: Finish implementing 3rd ability logic
+
+            if (!isAbility3OnCooldown && target != null && ability3Canvas.enabled)
             {
-                Debug.Log("Ability 3 Activated!");
-                isAbility3OnCooldown = true;
-                currentCooldown3 = ability3Cooldown;
+                Debug.Log($"Target set to {target.name}");
+
+                if (currentCoroutine != null)
+                    StopCoroutine(currentCoroutine);
+
+                currentCoroutine = StartCoroutine(DashCoroutine(target));
+
             }
         }
+    }
+
+    private IEnumerator DashCoroutine(GameObject target)
+    {
+        //var distance = Vector3.Distance(transform.position, target);
+        //Debug.Log($"Distance between objects: {distance}");
+
+        playerScript.SetTarget(target);
+
+        yield return new WaitUntil(()=> Vector3.Distance(transform.position, target.transform.position) <= maxAbility3Range);
+        //playerScript.agent.isStopped = true;
+
+        Debug.Log($"Method triggered once player was {Vector3.Distance(transform.position, target.transform.position)} units away.");
+
+        Debug.Log("Ability 3 Activated!");
+        isAbility3OnCooldown = true;
+        isDashing = true;
+        currentCooldown3 = ability3Cooldown;
+
+        var dashRot = GetAimDirection(target.transform.position);
+        Vector3 dashDir = dashRot * Vector3.forward;
+        Vector3 dashEnd = transform.position + dashDir * maxAbility3Range;
+
+        float t = 0f;
+        float duration = dashDuration;
+        Vector3 start = transform.position;
+
+        playerScript.agent.enabled = false;
+
+        while (t < 1f)
+        {
+            transform.position = Vector3.Lerp(start, dashEnd, t);
+            t += Time.deltaTime / duration;
+            yield return null;
+        }
+
+        transform.position = dashEnd;
+        playerScript.agent.enabled = true;
+        playerScript.agent.Warp(transform.position);
+        isDashing = false;
+
+        yield return null;
     }
     #endregion
     #region Ultimate-Ability-Methods
@@ -609,10 +673,10 @@ public class Abilitiies : MonoBehaviour
         return false;
     }
 
-    Quaternion GetAimDirection(Vector3 mouseLocation)
+    Quaternion GetAimDirection(Vector3 targetPos)
     {
 
-        aimDir = position - transform.position;
+        aimDir = targetPos - transform.position;
         aimDir.y = 0f;
         aimDir.Normalize();
 
@@ -620,4 +684,21 @@ public class Abilitiies : MonoBehaviour
         return aimRot;
     }
 
+    private void OnCollisionEnter(Collision other)
+    { 
+        if (!isDashing) { return; }
+
+        if (other.gameObject.layer == playerStats.targetLayer && isDashing)
+        {
+            //Debug.Log("Collided with target: " + other.gameObject.name);
+
+            if (other.gameObject.TryGetComponent<TargetDummy>(out TargetDummy targetStats))
+            {
+                //Debug.Log("Projectile hit player with current currentHealth: " + targetStats.currentHealth);
+
+                targetStats.ChangeHealth(-playerStats.attackDamage);
+                isDashing = false;
+            }
+        }
+    }
 }

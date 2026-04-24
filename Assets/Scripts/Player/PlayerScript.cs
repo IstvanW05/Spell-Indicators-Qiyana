@@ -7,6 +7,7 @@ public class PlayerScript : MonoBehaviour
 {
     private PlayerInput playerInput;
     private PlayerStats playerStats;
+    private Abilitiies abilitiies;
     public Camera mainCam;
 
     public GameObject moveIcon;
@@ -17,16 +18,15 @@ public class PlayerScript : MonoBehaviour
     readonly int layerGround = 8, BluePlayer = 10, RedPlayer = 11;
 
     GameObject target;
-    NavMeshAgent agent;
+    public NavMeshAgent agent;
     InputAction moveToClick;
 
     private void Start()
     {
         playerInput = GetComponent<PlayerInput>();
         playerStats = GetComponent<PlayerStats>();
+        abilitiies = GetComponent<Abilitiies>();
         agent = GetComponent<NavMeshAgent>();
-
-        agent.stoppingDistance = playerStats.attackRange;
 
         moveToClick = playerInput.actions["MoveToClick"];
         StartCoroutine(ClickToMoveLoop());
@@ -53,7 +53,8 @@ public class PlayerScript : MonoBehaviour
                 {
                     if (hit.collider.gameObject.layer == layerGround)
                     {
-                        hasTarget = false;
+                        ClearTarget();
+
                         if (NavMesh.SamplePosition(hit.point, out NavMeshHit navHit, 1.0f, NavMesh.AllAreas))
                         {
                             // Spawn icon only once per click
@@ -70,6 +71,7 @@ public class PlayerScript : MonoBehaviour
                     {
                         hasTarget = true;
                         target = hit.collider.gameObject;
+                        agent.stoppingDistance = playerStats.attackRange;
                     }
                 }
             }
@@ -78,13 +80,14 @@ public class PlayerScript : MonoBehaviour
                 if (Vector3.Distance(transform.position, target.transform.position) <= playerStats.attackRange)
                 {
                     // In attack range
-                    Debug.Log("Attacking " + target.name);
-                    if (target.TryGetComponent(out TargetDummy dummy))
-                        dummy.ChangeHealth(-10);
+                    //Debug.Log("Attacking " + target.name);
+                    //if (target.TryGetComponent(out TargetDummy dummy))
+                    //    dummy.ChangeHealth(-10);
                 }
                 else
                 {
-                    agent.SetDestination(target.transform.position);
+                    if (agent.enabled)
+                        agent.SetDestination(target.transform.position);
                 }
             }
 
@@ -92,14 +95,31 @@ public class PlayerScript : MonoBehaviour
         }
     }
 
+    public void SetTarget(GameObject newTarget)
+    {
+        target = newTarget;
+        hasTarget = true;
+
+        Debug.Log($"Target set to: {target.name}");
+    }
+
+    public void ClearTarget()
+    {
+        hasTarget = false;
+        target = null;
+        abilitiies.target = null;
+        if (abilitiies.currentCoroutine != null)
+            abilitiies.currentCoroutine = null;
+    }
+
     public IEnumerator WaitTillLanded()
     {
         yield return new WaitUntil(() => agent.enabled && agent.isOnNavMesh);
     }
 
-    public void FaceAimDirection(Quaternion target)
+    public void FaceAimDirection(Quaternion dir)
     {
         //Debug.Log("Facing aim direction");
-        transform.rotation = target;
+        transform.rotation = dir;
     }
 }
