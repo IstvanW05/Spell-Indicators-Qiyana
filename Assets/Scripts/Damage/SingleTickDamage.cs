@@ -10,7 +10,7 @@ public class SingleTickDamage : MonoBehaviour
 
     public void Initialize()
     {
-        Debug.Log("Initialized");
+        //Debug.Log("Initialized");
 
         this.targetLayer = playerStats.targetLayer;
     }

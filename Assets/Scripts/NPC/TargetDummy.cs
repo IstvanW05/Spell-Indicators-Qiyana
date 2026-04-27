@@ -57,7 +57,7 @@ public class TargetDummy : MonoBehaviour
         if (currentHealth > maxHealth) currentHealth = maxHealth;
         if (currentHealth < 0) currentHealth = 0;
 
-        Debug.Log($"Target Dummy took {Mathf.Abs(amount)} damage, currentHealth: {currentHealth}");
+        //Debug.Log($"Target Dummy took {Mathf.Abs(amount)} damage, currentHealth: {currentHealth}");
     }
 
     public void ResetHealth()

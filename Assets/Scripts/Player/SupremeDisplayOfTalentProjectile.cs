@@ -10,9 +10,6 @@ public class SupremeDisplayOfTalentProjectile : MonoBehaviour
 {
     private List<GameObject> targetsHit = null;
 
-    private int terrainMask = 7;
-    private int wallMask = 9;
-
     private Quaternion aimRot;
 
     private int baseDamage;
@@ -31,10 +28,36 @@ public class SupremeDisplayOfTalentProjectile : MonoBehaviour
 
     private int activeCoroutines = 0;
 
+    Vector3 start;
+    Vector3 end;
+
     private void Start()
     {
-        Debug.Log("Projectile initialized with base damage: " + baseDamage);
+        //Debug.Log("Projectile initialized with base damage: " + baseDamage);
         targetsHit = new List<GameObject>();
+    }
+
+    private void Update()
+    {
+        if (start != null && end != null)
+        {
+            Vector3 dir = (end - start).normalized;
+            float distance = Vector3.Distance(start, end);
+
+            Debug.Log("Start inside collider " + Physics.CheckSphere(start, .01f, LayerMask.GetMask("Walls")));
+            //Debug.DrawRay(start, dir * distance, Color.green);
+
+            if (Physics.Raycast(start, dir, out RaycastHit hit, distance, LayerMask.GetMask("Walls")))
+            {
+                Debug.Log("Hit: " + hit.collider.name);
+                Debug.DrawLine(start, hit.point, Color.yellow);
+            }
+            else
+            {
+                Debug.Log("NO HIT");
+                Debug.DrawRay(start, dir * distance, Color.red);
+            }
+        }
     }
     private void FixedUpdate()
     {
@@ -70,7 +93,8 @@ public class SupremeDisplayOfTalentProjectile : MonoBehaviour
 
     private void OnTriggerEnter(Collider other)
     {
-        if (other.gameObject.layer == wallMask)
+
+        if (other.gameObject.layer == LayerMask.NameToLayer("Walls"))
         {
             //TODO:  A way to set the projectile off 
             isMoving = false;
@@ -124,6 +148,7 @@ public class SupremeDisplayOfTalentProjectile : MonoBehaviour
         float finalDis = (pushDis > 0f) ? pushDis : maxPushDistance;
 
         endpoint = start + aimDir * finalDis;
+        this.end = endpoint;
 
         StartTrackedCoroutine(PushArc(agent, endpoint));
     }
@@ -161,7 +186,9 @@ public class SupremeDisplayOfTalentProjectile : MonoBehaviour
         Vector3 dir = (end - start).normalized;
         float distance = Vector3.Distance(start, end);
 
-        if (Physics.Raycast(start, dir, out RaycastHit hit, distance, wallMask))
+        this.start = start;
+
+        if (Physics.Raycast(start, dir, out RaycastHit hit, distance, LayerMask.GetMask("Walls")))
         {
             return hit.distance; // distance from start to the wall
         }

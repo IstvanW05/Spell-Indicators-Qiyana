@@ -576,7 +576,7 @@ public class Abilities : MonoBehaviour
             SetInactive(i);
             Cursor.visible = true;
 
-            Debug.Log("Ultimate Ability Previewed!");
+            //Debug.Log("Ultimate Ability Previewed!");
         }
         if (ultimateAbilityAction.WasReleasedThisFrame())
         {
@@ -586,7 +586,7 @@ public class Abilities : MonoBehaviour
             {
                 yield return currentCoroutine = StartCoroutine(playerScript.WaitTillLanded());
 
-                Debug.Log("Ultimate Ability Activated!");
+                //Debug.Log("Ultimate Ability Activated!");
                 playerScript.FaceAimDirection(aimRot);
                 Instantiate(ultimateAbilityProjectile, transform.position + Vector3.forward, aimRot).GetComponent<SupremeDisplayOfTalentProjectile>().Initialize(playerStats.attackDamage, playerStats.targetLayer, aimRot);
 
