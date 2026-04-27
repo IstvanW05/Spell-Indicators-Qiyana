@@ -5,7 +5,7 @@ using UnityEngine;
 using UnityEngine.InputSystem;
 using UnityEngine.TerrainUtils;
 using UnityEngine.UI;
-public class Abilitiies : MonoBehaviour
+public class Abilities : MonoBehaviour
 {
     private PlayerInput playerInput;
     private PlayerScript playerScript;
@@ -99,6 +99,8 @@ public class Abilitiies : MonoBehaviour
 
     bool isUltimateAbilityOnCooldown = false;
     float currentUltimateCooldown;
+
+    public GameObject ultimateAbilityProjectile;
     #endregion
 
     private ElementType currentElement = ElementType.None;
@@ -159,7 +161,7 @@ public class Abilitiies : MonoBehaviour
         StartCoroutine(Ability1Input());
         Ability2Input();
         Ability3Input();
-        UltimateAbilityInput();
+        StartCoroutine(UltimateAbilityInput());
 
         AbilityCooldown(ref currentCooldown1, ability1Cooldown, ref isAbility1OnCooldown, abilityImage1Greyed, abilityText1);
         AbilityCooldown(ref currentCooldown2, ability2Cooldown, ref isAbility2OnCooldown, abilityImage2Greyed, abilityText2);
@@ -180,7 +182,7 @@ public class Abilitiies : MonoBehaviour
             if (Physics.Raycast(ray, out hit, Mathf.Infinity))
             {
                 position = new Vector3(hit.point.x, hit.point.y, hit.point.z);
-                
+
                 GetAimDirection(position);
             }
 
@@ -439,16 +441,16 @@ public class Abilitiies : MonoBehaviour
                 break;
         }
     }
-    void OnDrawGizmosSelected() // Visualize the search radius for terrain elements when the object is selected in the editor
-    {
-        var capsule = GetComponent<CapsuleCollider>();
+    //void OnDrawGizmosSelected() // Visualize the search radius for terrain elements when the object is selected in the editor
+    //{
+    //    var capsule = GetComponent<CapsuleCollider>();
 
-        Vector3 feet = capsule.bounds.center - new Vector3(0, capsule.bounds.extents.y, 0);
+    //    Vector3 feet = capsule.bounds.center - new Vector3(0, capsule.bounds.extents.y, 0);
 
 
-        Gizmos.color = Color.cyan;
-        Gizmos.DrawWireSphere(feet, ability2TargetRange);
-    }
+    //    Gizmos.color = Color.cyan;
+    //    Gizmos.DrawWireSphere(feet, ability2TargetRange);
+    //}
     #endregion
     #region Ability-3-Methods
     // NOTE: Usually The indicator for the dash grows or shrinks depending on the distance to the target, but for simplicity, it will just be a fixed size indicator that shows the direction of the dash.
@@ -477,7 +479,7 @@ public class Abilitiies : MonoBehaviour
             SetInactive(i);
             Cursor.visible = true;
 
-            Debug.Log("Ability 3 Previewed!");
+            //Debug.Log("Ability 3 Previewed!");
 
             if (!isAbility3OnCooldown && Physics.Raycast(ray, out hit, Mathf.Infinity, playerStats.targetLayer))
                 target = hit.rigidbody.gameObject;
@@ -492,7 +494,7 @@ public class Abilitiies : MonoBehaviour
 
             if (!isAbility3OnCooldown && target != null && ability3Canvas.enabled)
             {
-                Debug.Log($"Target set to {target.name}");
+                //Debug.Log($"Target set to {target.name}");
 
                 if (currentCoroutine != null)
                     StopCoroutine(currentCoroutine);
@@ -513,9 +515,9 @@ public class Abilitiies : MonoBehaviour
         yield return new WaitUntil(()=> Vector3.Distance(transform.position, target.transform.position) <= maxAbility3Range);
         //playerScript.agent.isStopped = true;
 
-        Debug.Log($"Method triggered once player was {Vector3.Distance(transform.position, target.transform.position)} units away.");
+        //Debug.Log($"Method triggered once player was {Vector3.Distance(transform.position, target.transform.position)} units away.");
 
-        Debug.Log("Ability 3 Activated!");
+        //Debug.Log("Ability 3 Activated!");
         isAbility3OnCooldown = true;
         isDashing = true;
         currentCooldown3 = ability3Cooldown;
@@ -553,6 +555,8 @@ public class Abilitiies : MonoBehaviour
             if (Physics.Raycast(ray, out hit, Mathf.Infinity))
             {
                 position = new Vector3(hit.point.x, hit.point.y, hit.point.z);
+
+                GetAimDirection(position);
             }
 
             Quaternion ultCanvas = Quaternion.LookRotation(position - transform.position);
@@ -561,7 +565,7 @@ public class Abilitiies : MonoBehaviour
             ultimateAbilityCanvas.transform.rotation = Quaternion.Lerp(ultCanvas, ultimateAbilityCanvas.transform.rotation.normalized, 0);
         }
     }
-    void UltimateAbilityInput()
+    IEnumerator UltimateAbilityInput()
     {
         int i = 4;
 
@@ -580,11 +584,18 @@ public class Abilitiies : MonoBehaviour
 
             if (!isUltimateAbilityOnCooldown && ultimateAbilityCanvas.enabled)
             {
+                yield return currentCoroutine = StartCoroutine(playerScript.WaitTillLanded());
+
                 Debug.Log("Ultimate Ability Activated!");
+                playerScript.FaceAimDirection(aimRot);
+                Instantiate(ultimateAbilityProjectile, transform.position + Vector3.forward, aimRot).GetComponent<SupremeDisplayOfTalentProjectile>().Initialize(playerStats.attackDamage, playerStats.targetLayer, aimRot);
+
+                currentCoroutine = null;
                 isUltimateAbilityOnCooldown = true;
                 currentUltimateCooldown = ultimateAbilityCooldown;
             }
         }
+        yield break;
     }
     #endregion
 

@@ -7,7 +7,7 @@ public class PlayerScript : MonoBehaviour
 {
     private PlayerInput playerInput;
     private PlayerStats playerStats;
-    private Abilitiies abilitiies;
+    private Abilities abilitiies;
     public Camera mainCam;
 
     public GameObject moveIcon;
@@ -25,7 +25,7 @@ public class PlayerScript : MonoBehaviour
     {
         playerInput = GetComponent<PlayerInput>();
         playerStats = GetComponent<PlayerStats>();
-        abilitiies = GetComponent<Abilitiies>();
+        abilitiies = GetComponent<Abilities>();
         agent = GetComponent<NavMeshAgent>();
 
         moveToClick = playerInput.actions["MoveToClick"];
@@ -100,7 +100,7 @@ public class PlayerScript : MonoBehaviour
         target = newTarget;
         hasTarget = true;
 
-        Debug.Log($"Target set to: {target.name}");
+        //Debug.Log($"Target set to: {target.name}");
     }
 
     public void ClearTarget()
