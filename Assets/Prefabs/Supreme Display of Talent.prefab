@@ -82,6 +82,11 @@ MonoBehaviour:
   lifetime: 3
   isBlue: 0
   applyRoot: 0
+  wallLayer:
+    serializedVersion: 2
+    m_Bits: 512
+  searchRadius: 1
+  visited: []
 --- !u!65 &4493740036446871821
 BoxCollider:
   m_ObjectHideFlags: 0
@@ -150,6 +155,7 @@ MeshRenderer:
   m_SortingLayerID: 0
   m_SortingLayer: 0
   m_SortingOrder: 0
+  m_MaskInteraction: 0
   m_AdditionalVertexStreams: {fileID: 0}
 --- !u!33 &2415869362948354667
 MeshFilter:
