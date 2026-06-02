@@ -59,7 +59,7 @@ public class SupremeDisplayOfTalentProjectile : MonoBehaviour
             float distance = Vector3.Distance(start, end);
 
             Debug.Log("Start inside collider " + Physics.CheckSphere(start, .01f, LayerMask.GetMask("Walls")));
-            //Debug.DrawRay(start, dir * distance, Color.green);
+            //Debug.DrawRay(start, dirA * distance, Color.green);
 
             if (Physics.Raycast(start, dir, out RaycastHit hit, distance, LayerMask.GetMask("Walls")))
             {
@@ -128,7 +128,7 @@ public class SupremeDisplayOfTalentProjectile : MonoBehaviour
 
                 if (other.gameObject.TryGetComponent<TargetDummy>(out TargetDummy targetStats))
                 {
-                    Debug.Log("Projectile hit player with current currentHealth: " + targetStats.currentHealth);
+                    Debug.Log("Projectile hitA player with current currentHealth: " + targetStats.currentHealth);
 
                     if (other.gameObject.TryGetComponent<NavMeshAgent>(out NavMeshAgent agent))
                     {
@@ -226,7 +226,7 @@ public class SupremeDisplayOfTalentProjectile : MonoBehaviour
     }
 
     // Collect colliders
-    void StartFill(Collider start) 
+    void StartFill(Collider start)
     {
         visited.Clear();
         FloodFill(start);
@@ -235,7 +235,7 @@ public class SupremeDisplayOfTalentProjectile : MonoBehaviour
         //    Debug.Log("Connected collider: " + col.name);
         //}
         OutlineColliders(visited);
-    } 
+    }
     List<Collider> FloodFill(Collider start) // Returns all colliders connected to the start collider within the padding threshold to the 'visited' list
     {
         visited.Add(start);
@@ -399,7 +399,8 @@ public class SupremeDisplayOfTalentProjectile : MonoBehaviour
         List<Vector3> combined = CornerPoints.Concat(NormalPoints).ToList();
         List<Vector3> debugCombined = debugCornerPoints.Concat(debugNormalPoints).ToList();
 
-        SortOutlinePoints(combined, colliders);
+        List<Vector3> sorted = SortOutlinePoints(combined, colliders);
+        VisualizeOutline(sorted);
     }
 
     [SerializeField] Vector3 startingPoint;
@@ -427,18 +428,75 @@ public class SupremeDisplayOfTalentProjectile : MonoBehaviour
         }
         Debug.Log("Closest point: " + closestPoint);
 
+        Vector3 current = startingPoint;
+        sorted.Add(startingPoint);
+
+        // Find next closest point with line of sight, add to sorted, repeat until all points visited or we loop back to start
+
+        HashSet<int> visited = new HashSet<int>();
+        //visited.Add(points.IndexOf(startingPoint));
+
+        int safety = 0;
+
+        while (safety < 5000)
+        {
+            safety++;
+
+            float bestDist = float.MaxValue;
+            int bestIndex = -1;
+
+            for (int i = 0; i < points.Count; i++)
+            {
+                if (visited.Contains(i))
+                    continue;
+
+                Vector3 candidate = points[i];
+
+                // Must be visible
+                if (SegmentIntersectsAnyCollider(current, candidate, colliders))
+                    continue;
+
+                float dist = Vector3.Distance(current, candidate);
+
+                if (dist < bestDist)
+                {
+                    bestDist = dist;
+                    bestIndex = i;
+                }
+            }
+
+            if (bestIndex == -1)
+            {
+                Debug.LogWarning("No visible next point found — stopping early");
+                Debug.Log($"Current point: {current}, Remaining points: {points.Count - visited.Count}");
+                break;
+            }
+
+            Vector3 next = points[bestIndex];
+            sorted.Add(next);
+            visited.Add(bestIndex);
+
+            current = next;
+
+            // Stop if we loop back to start
+            if (Vector3.Distance(current, start) < 0.01f)
+                break;
+        }
 
         return sorted;
     }
 
     bool SegmentIntersectsAnyCollider(Vector3 a, Vector3 b, List<Collider> colliders)
     {
-        Vector3 dir = (b - a);
-        float dist = dir.magnitude;
+        // Check both directions to avoid starting inside a collider and missing it
+        Vector3 dirA = (b - a);
+        Vector3 dirB = (a - b);
+        float dist = dirA.magnitude;
+        float distB = dirB.magnitude;
 
-        if (Physics.Raycast(a, dir.normalized, out RaycastHit hit, dist + 0.01f))
+        if (Physics.Raycast(a, dirA.normalized, out RaycastHit hitA, dist + 0.01f) && Physics.Raycast(b, dirB.normalized, out RaycastHit hitB, distB + 0.01f))
         {
-            if (colliders.Contains(hit.collider))
+            if (colliders.Contains(hitA.collider) || colliders.Contains(hitB.collider))
                 return true;
         }
 
@@ -446,30 +504,30 @@ public class SupremeDisplayOfTalentProjectile : MonoBehaviour
     }
 
     List<Vector3> DeleteClosePoints(List<Vector3> points, List<Collider> colliders)
-    { 
+    {
         if (points.Count <= 0 || colliders.Count <= 0) return null;
 
-            var filtered = new List<Vector3>();
+        var filtered = new List<Vector3>();
 
-            foreach (var p in points)
+        foreach (var p in points)
+        {
+            bool tooClose = false;
+
+            foreach (var col in colliders)
             {
-                bool tooClose = false;
-    
-                foreach (var col in colliders)
+                Vector3 closest = col.ClosestPoint(p);
+                float dist = Vector3.Distance(p, closest);
+
+                if (dist < offsetDistance - 0.01f)
                 {
-                    Vector3 closest = col.ClosestPoint(p);
-                    float dist = Vector3.Distance(p, closest);
-    
-                    if (dist < offsetDistance - 0.01f)
-                    {
-                        tooClose = true;
-                        break;
-                    }
+                    tooClose = true;
+                    break;
                 }
-    
-                if (!tooClose)
-                    filtered.Add(p);
             }
+
+            if (!tooClose)
+                filtered.Add(p);
+        }
 
         return filtered;
     }
@@ -507,13 +565,13 @@ public class SupremeDisplayOfTalentProjectile : MonoBehaviour
     // VISUALIZER
     private void OnDrawGizmos()
     {
-        foreach(var p in debugCornerPoints)
+        foreach (var p in debugCornerPoints)
         {
             Gizmos.color = Color.yellow;
             Gizmos.DrawSphere(p, 0.1f);
         }
 
-        foreach(var n in debugNormalPoints)
+        foreach (var n in debugNormalPoints)
         {
             Gizmos.color = Color.red;
             Gizmos.DrawSphere(n, 0.1f);
@@ -532,4 +590,26 @@ public class SupremeDisplayOfTalentProjectile : MonoBehaviour
         }
     }
 
+    // MARK: Create a LineRenderer to visualize the outline points
+    [SerializeField] float lineWidth = 0.1f;
+    [SerializeField] Color lineColor = Color.red;
+    [SerializeField] float lineLifetime = 0f;
+    void VisualizeOutline(List<Vector3> pts)
+    {
+        if (pts == null || pts.Count < 2) return;
+
+        GameObject obj = new("OutlineVisualizer");
+        obj.transform.SetParent(transform);
+
+        LineRenderer lr = obj.AddComponent<LineRenderer>();
+        lr.useWorldSpace = true;
+        lr.loop = true;
+        lr.material = new Material(Shader.Find("Sprites/Default"));
+        lr.startColor = lr.endColor = lineColor;
+        lr.startWidth = lr.endWidth = lineWidth;
+        lr.positionCount = pts.Count;
+        lr.SetPositions(pts.ToArray());
+
+        if (lineLifetime > 0) Destroy(obj, lineLifetime);
+    }
 }
