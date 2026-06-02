@@ -31,6 +31,7 @@ public class SupremeDisplayOfTalentProjectile : MonoBehaviour
 
     private int activeCoroutines = 0;
 
+    Vector3 impactPoint;
     Vector3 start;
     Vector3 end;
 
@@ -109,7 +110,7 @@ public class SupremeDisplayOfTalentProjectile : MonoBehaviour
         if (other.gameObject.layer == LayerMask.NameToLayer("Walls"))
         {
             //TODO:  A way to set the projectile off 
-            Vector3 impactPoint = other.ClosestPoint(transform.position);
+            impactPoint = other.ClosestPoint(transform.position);
 
             isMoving = false;
 
@@ -394,6 +395,54 @@ public class SupremeDisplayOfTalentProjectile : MonoBehaviour
 
         // Sort
 
+        // Combine list
+        List<Vector3> combined = CornerPoints.Concat(NormalPoints).ToList();
+        List<Vector3> debugCombined = debugCornerPoints.Concat(debugNormalPoints).ToList();
+
+        SortOutlinePoints(combined, colliders);
+    }
+
+    [SerializeField] Vector3 startingPoint;
+    List<Vector3> SortOutlinePoints(List<Vector3> points, List<Collider> colliders)
+    {
+        if (points.Count <= 0 || impactPoint == null) return null;
+
+        var sorted = new List<Vector3>();
+
+        // Find closest point to impactPoint that has line of sight
+        var closestPoint = points[0];
+        var closestDist = Vector3.Distance(points[0], impactPoint);
+
+        foreach (var p in points)
+        {
+            float d = Vector3.Distance(p, impactPoint);
+
+            if (d < closestDist && !SegmentIntersectsAnyCollider(p, impactPoint, colliders))
+            {
+                closestDist = d;
+                closestPoint = p;
+
+                startingPoint = closestPoint;
+            }
+        }
+        Debug.Log("Closest point: " + closestPoint);
+
+
+        return sorted;
+    }
+
+    bool SegmentIntersectsAnyCollider(Vector3 a, Vector3 b, List<Collider> colliders)
+    {
+        Vector3 dir = (b - a);
+        float dist = dir.magnitude;
+
+        if (Physics.Raycast(a, dir.normalized, out RaycastHit hit, dist + 0.01f))
+        {
+            if (colliders.Contains(hit.collider))
+                return true;
+        }
+
+        return false;
     }
 
     List<Vector3> DeleteClosePoints(List<Vector3> points, List<Collider> colliders)
@@ -468,6 +517,18 @@ public class SupremeDisplayOfTalentProjectile : MonoBehaviour
         {
             Gizmos.color = Color.red;
             Gizmos.DrawSphere(n, 0.1f);
+        }
+
+        if (startingPoint != Vector3.zero)
+        {
+            Gizmos.color = Color.green;
+            Gizmos.DrawSphere(startingPoint, 0.3f);
+        }
+
+        if (impactPoint != Vector3.zero)
+        {
+            Gizmos.color = Color.blue;
+            Gizmos.DrawSphere(impactPoint, 0.3f);
         }
     }
 
