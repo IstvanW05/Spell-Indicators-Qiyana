@@ -6,6 +6,7 @@ using System.Linq;
 using UnityEngine;
 using UnityEngine.AI;
 using UnityEngine.InputSystem.XR;
+using UnityEngine.UI;
 using static UnityEngine.GraphicsBuffer;
 
 public class SupremeDisplayOfTalentProjectile : MonoBehaviour
@@ -113,8 +114,7 @@ public class SupremeDisplayOfTalentProjectile : MonoBehaviour
             isMoving = false;
 
             StartFill(other);
-            List<Vector3> outline = GenerateColliderClusterOutline(visited, sampleStep, offsetDistance, impactPoint);
-            VisualizeOutline(outline);
+
         }
 
         if (other.gameObject.layer == targetLayer)
@@ -229,6 +229,11 @@ public class SupremeDisplayOfTalentProjectile : MonoBehaviour
     {
         visited.Clear();
         FloodFill(start);
+        //foreach (var col in visited)
+        //{
+        //    Debug.Log("Connected collider: " + col.name);
+        //}
+        OutlineColliders(visited);
     } 
     List<Collider> FloodFill(Collider start) // Returns all colliders connected to the start collider within the padding threshold to the 'visited' list
     {
@@ -306,337 +311,164 @@ public class SupremeDisplayOfTalentProjectile : MonoBehaviour
 
     // OUTLINE GENERATION SYSTEM
 
-    struct SamplePoint
-    {
-        public Vector3 point, normal;
-        public SamplePoint(Vector3 p, Vector3 n) { point = p; normal = n.normalized; }
-    }
+    [SerializeField] List<Vector3> CornerPoints = new List<Vector3>();
+    [SerializeField] List<Vector3> NormalPoints = new List<Vector3>();
 
-    List<Vector3> GenerateColliderClusterOutline(List<Collider> colliders, float sampleStep, float offsetDistance, Vector3 impactPoint)
+    [SerializeField] List<Vector3> debugCornerPoints = new List<Vector3>();
+    [SerializeField] List<Vector3> debugNormalPoints = new List<Vector3>();
+
+    void OutlineColliders(List<Collider> colliders)
     {
-        if (colliders == null || colliders.Count == 0) 
+
+        foreach (var col in colliders)
         {
-            Debug.LogWarning("No colliders provided for outline generation.");
-            return new List<Vector3>();
-        }
+            // Corner Sampling
+            BoxCollider box = (BoxCollider)col;
 
-        List<Vector3> raw = new List<Vector3>();
+            Vector3 ext = box.size * 0.5f;
 
-        // Corner samples
-        foreach (var c in colliders.OfType<BoxCollider>())
-            foreach (var corner in GetBoxColliderCorners(c))
+            Vector3[] normals = new Vector3[4]
             {
-                Vector3 n = ComputeCornerNormal(c, corner);
-                Vector3 p = corner + n * offsetDistance;
-                if (IsExteriorPoint(p, n, colliders)) raw.Add(p);
+                box.transform.TransformDirection(Vector3.left),    // -X face
+                box.transform.TransformDirection(Vector3.back),    // -Z face
+                box.transform.TransformDirection(Vector3.right),   // +X face
+                box.transform.TransformDirection(Vector3.forward)  // +Z face
+            };
+
+            Vector3 nx = normals[0];    // -X face
+            Vector3 nz = normals[1];    // -Z face
+            Vector3 px = normals[2];    // +X face
+            Vector3 pz = normals[3];    // +Z face
+
+            Vector3[] localCorners = new Vector3[]
+            {
+                new Vector3(-ext.x, 0f, ext.z),     // Top-left
+                new Vector3(-ext.x, 0f, -ext.z),    // Bottom-left
+                new Vector3(ext.x, 0f, -ext.z),     // Bottom-right
+                new Vector3(ext.x, 0f, ext.z)       // Top-right
+            };
+
+            List<(Vector3, Vector3, Vector3)> normalToCornerMap = new List<(Vector3, Vector3, Vector3)>
+            {
+                (localCorners[0], nx, pz),  // Top-left
+                (localCorners[1], nx, nz),  // Bottom-left
+                (localCorners[3], px, nz),  // Bottom-right
+                (localCorners[2], px, pz)   // Top-right
+
+            };
+
+            List<Vector3> bisectors = ComputeBisector(normalToCornerMap);
+
+            for (int i = 0; i < localCorners.Length; i++)
+            {
+                Vector3 worldCorner = box.transform.TransformPoint(localCorners[i]);
+                Vector3 offsetCorner = worldCorner + bisectors[i] * offsetDistance;
+
+                debugCornerPoints.Add(offsetCorner);
+                CornerPoints.Add(offsetCorner);
             }
 
-        // Edge samples
-        List<SamplePoint> samples = colliders.SelectMany(c => SampleCollider(c, sampleStep)).ToList();
-        raw.AddRange(BuildOffsetExteriorPoints(samples, colliders, offsetDistance));
-
-        raw = RemoveDuplicatePoints(raw, 0.01f);
-        raw = ConsolidateNearbyPoints(raw, mergeThreshold, colliders);
-        return SortLoop(raw, impactPoint, visited);
-    }
-
-    List<Vector3> GetBoxColliderCorners(BoxCollider box)
-    {
-        Vector3 ext = Vector3.Scale(box.size * 0.5f, box.transform.lossyScale); // Adjust for scale
-        Vector3[] lc = // Local corners (y=0 plane)
-        {
-            new(-ext.x,0,-ext.z),
-            new(-ext.x,0,ext.z),
-            new(ext.x,0,ext.z),
-            new(ext.x,0,-ext.z)
-        };
-        return lc.Select(c => box.transform.TransformPoint(c + box.center)).ToList(); // Shift to center and transform to world space
-    }
-
-    Vector3 ComputeCornerNormal(BoxCollider box, Vector3 worldCorner)
-    {
-        Vector3 local = box.transform.InverseTransformPoint(worldCorner) - box.center;
-
-        // Determine which quadrant the corner is in to assign a normal direction
-        Vector3 nx = (local.x > 0) ? Vector3.right : Vector3.left;
-        Vector3 nz = (local.z > 0) ? Vector3.forward : Vector3.back;
-        return box.transform.TransformDirection((nx + nz).normalized);
-    }
-    List<SamplePoint> SampleCollider(Collider col, float step) =>
-        (col is BoxCollider box) ? SampleBoxCollider(box, step) : new List<SamplePoint>();
-
-    List<SamplePoint> SampleBoxCollider(BoxCollider box, float step)
-    {
-        List<SamplePoint> pts = new();
-        Transform t = box.transform;
-        Vector3 ext = box.size * 0.5f;
-
-        Vector3[] corners =
-        {
-        new(-ext.x,0,-ext.z), new(-ext.x,0,ext.z),
-        new(ext.x,0,ext.z),   new(ext.x,0,-ext.z)
-    };
-
-        for (int i = 0; i < 4; i++)
-        {
-            Vector3 a = corners[i], b = corners[(i + 1) % 4];
-            int steps = Mathf.Max(1, Mathf.CeilToInt(Vector3.Distance(box.transform.TransformPoint(a + box.center), box.transform.TransformPoint(b + box.center)) / step));
-
-            for (int s = 0; s <= steps; s++)
+            // Face Sampling
+            for (int i = 0; i < localCorners.Length; i++)
             {
-                Vector3 p = t.TransformPoint(Vector3.Lerp(a, b, s / (float)steps) + box.center);
-                pts.Add(new SamplePoint(p, ComputeOutwardNormal(box, p)));
+                Vector3 a = box.transform.TransformPoint(localCorners[i]);
+                Vector3 b = box.transform.TransformPoint(localCorners[(i + 1) % localCorners.Length]);
+
+                Vector3 faceNormal = normals[i];
+
+                SampleFaces(faceNormal, a, b);
             }
         }
-        return pts;
+
+        // Delete duplicate points
+        CornerPoints = CornerPoints.Distinct().ToList();
+        NormalPoints = NormalPoints.Distinct().ToList();
+        debugCornerPoints = debugCornerPoints.Distinct().ToList();
+        debugNormalPoints = debugNormalPoints.Distinct().ToList();
+
+        // Delete points that are too close to colliders
+        CornerPoints = DeleteClosePoints(CornerPoints, colliders);
+        NormalPoints = DeleteClosePoints(NormalPoints, colliders);
+        debugCornerPoints = DeleteClosePoints(debugCornerPoints, colliders);
+        debugNormalPoints = DeleteClosePoints(debugNormalPoints, colliders);
+
+        // Sort
+
     }
 
-    Vector3 ComputeOutwardNormal(BoxCollider box, Vector3 world)
-    {
-        Vector3 local = box.transform.InverseTransformPoint(world) - box.center;
-        Vector3 half = box.size * 0.5f;
+    List<Vector3> DeleteClosePoints(List<Vector3> points, List<Collider> colliders)
+    { 
+        if (points.Count <= 0 || colliders.Count <= 0) return null;
 
-        float dx = Mathf.Min(Mathf.Abs(half.x - local.x), Mathf.Abs(-half.x - local.x));
-        float dz = Mathf.Min(Mathf.Abs(half.z - local.z), Mathf.Abs(-half.z - local.z));
+            var filtered = new List<Vector3>();
 
-        Vector3 n = (dx < dz)
-            ? new Vector3(Mathf.Sign(local.x), 0, 0)
-            : new Vector3(0, 0, Mathf.Sign(local.z));
-
-        return box.transform.TransformDirection(n).normalized;
-    }
-
-
-    List<Vector3> BuildOffsetExteriorPoints(List<SamplePoint> samples, List<Collider> cols, float dist)
-    {
-        List<Vector3> pts = new();
-
-        float tolerance = offsetDistance * 0.25f; // Allowable tolerance for clearance checks
-        float minClearance = offsetDistance - tolerance;
-        float maxClearance = offsetDistance + tolerance;
-
-        foreach (var s in samples)
-        {
-            Vector3 p = s.point + s.normal * dist;
-            if (!IsInside(cols, p))
+            foreach (var p in points)
             {
-                if (WithinAcceptableDistanceFromColliders(p, cols, minClearance, maxClearance))
-                    pts.Add(p);
-            }
-            else
-                continue;
-
-        }
-        return pts;
-    }
+                bool tooClose = false;
     
-    bool IsInside(List<Collider> cols, Vector3 point)
-    {
-        return Physics.CheckSphere(point, 0.02f, wallLayer, QueryTriggerInteraction.Ignore);
-    }
-
-    // SORT
-    List<Vector3> SortLoop(List<Vector3> pts, Vector3 impactPoint, List<Collider> colliders)
-    {
-        if (pts.Count < 3) return pts;
-
-        Vector3 start = FindClosestValidStartPoint(pts, impactPoint, colliders);
-        //Vector3 start = pts.OrderBy(p => p.x).ThenBy(p => p.z).First();
-        List<Vector3> ordered = new() { start };
-
-        Vector3 cur = start, prevDir = Vector3.forward;
-        HashSet<int> used = new() { pts.IndexOf(start) };
-
-        for (int step = 0; step < pts.Count; step++)
-        {
-            float best = float.MaxValue;
-            int bestIdx = -1;
-
-            for (int i = 0; i < pts.Count; i++)
-            {
-                if (used.Contains(i)) continue;
-                Vector3 cand = pts[i];
-
-                if (!SegmentIsClear(cur, cand, visited)) continue;
-
-                Vector3 dir = (cand - cur).normalized;
-                float score = Vector3.Distance(cur, cand) + Mathf.Abs(Vector3.SignedAngle(prevDir, dir, Vector3.up)) * 0.1f;
-
-                if (score < best) { best = score; bestIdx = i; }
-            }
-
-            if (bestIdx == -1) break;
-
-            Vector3 next = pts[bestIdx];
-            ordered.Add(next);
-            prevDir = (next - cur).normalized;
-            cur = next;
-            used.Add(bestIdx);
-        }
-        ordered = EnsureLoopClosure(ordered, visited);
-
-        return ordered;
-    }
-
-    bool SegmentIsClear(Vector3 a, Vector3 b, List<Collider> cols)
-    {
-        Vector3 dir = (b - a).normalized;
-        Vector3 dir2 = (a - b).normalized;
-        float dist = Vector3.Distance(a, b);
-
-        Vector3 origin = a + Vector3.up * 0.01f;
-
-        Ray ray = new Ray(origin, dir);
-        Ray ray2 = new Ray(b + Vector3.up * 0.01f, dir2);
-        foreach (var c in cols)
-        {
-            if (!c.enabled) continue;
-
-            if (c.Raycast(ray, out RaycastHit _, dist) || c.Raycast(ray2, out RaycastHit _, dist))
-                return false;
-        }
-
-        return true;
-    }
-
-    // UTIL
-    List<Vector3> RemoveDuplicatePoints(List<Vector3> pts, float th)
-    {
-        List<Vector3> u = new();
-        float t2 = th * th;
-
-        foreach (var p in pts)
-            if (!u.Any(q => (q - p).sqrMagnitude < t2))
-                u.Add(p);
-
-        return u;
-    }
-    Vector3 FindClosestValidStartPoint(List<Vector3> pts, Vector3 impact, List<Collider> colliders)
-    {
-        Vector3 best = pts[0];
-        float bestDist = float.MaxValue;
-
-        foreach (var p in pts)
-        {
-            float d = (p - impact).sqrMagnitude;
-
-            // Must be closer
-            if (d >= bestDist) continue;
-
-            // Must be reachable without crossing walls
-            if (!SegmentIsClear(impact, p, colliders)) continue;
-
-            bestDist = d;
-            best = p;
-        }
-
-    List<Vector3> ConsolidateNearbyPoints(List<Vector3> points, float threshold)
-        return best;
-    }
-
-    // TODO: Compare target points with all points and use SegmentIsClear to merge points that are close and mutually reachable, to reduce clutter
-    {
-        float t2 = threshold * threshold;
-        List<Vector3> result = new List<Vector3>(points);
-        bool changed = true;
-
-        while (changed)
-        {
-            changed = false;
-
-            for (int i = 0; i < result.Count; i++)
-            {
-                for (int j = i + 1; j < result.Count; j++)
+                foreach (var col in colliders)
                 {
-                    if ((result[i] - result[j]).sqrMagnitude < t2)
+                    Vector3 closest = col.ClosestPoint(p);
+                    float dist = Vector3.Distance(p, closest);
+    
+                    if (dist < offsetDistance - 0.01f)
                     {
-                        // Merge into average
-                        Vector3 merged = (result[i] + result[j]) * 0.5f;
-
-                        // Remove originals
-                        result.RemoveAt(j);
-                        result.RemoveAt(i);
-
-                        // Insert merged
-                        result.Add(merged);
-
-                        changed = true;
+                        tooClose = true;
                         break;
                     }
                 }
-
-                if (changed) break;
+    
+                if (!tooClose)
+                    filtered.Add(p);
             }
-        }
 
-        return result;
-    }
-    bool TooCloseToAnyCollider(Vector3 point, List<Collider> colliders, float minClearance)
-    {
-        float minClearanceSqr = minClearance * minClearance;
-
-        foreach (var c in colliders)
-        {
-            // Closest point on collider surface
-            Vector3 closest = c.ClosestPoint(point);
-
-            // If the point is inside the collider, ClosestPoint returns the point itself
-            float d2 = (closest - point).sqrMagnitude;
-
-            if (d2 >= minClearanceSqr && d2 <= maxClearanceSqr)
-                return true;
-        }
-
-        return false;
+        return filtered;
     }
 
-    List<Vector3> EnsureLoopClosure(List<Vector3> pts, List<Collider> colliders)
+    void SampleFaces(Vector3 faceNormal, Vector3 a, Vector3 b)
     {
-        if (pts.Count < 3)
-            return pts;
+        float length = Vector3.Distance(a, b);
+        int steps = Mathf.CeilToInt(length / sampleStep);
 
-        bool changed = true;
-
-        while (changed)
+        for (int i = 0; i <= steps; i++)
         {
-            changed = false;
+            float t = (float)i / steps;
+            Vector3 p = Vector3.Lerp(a, b, t);
 
-            Vector3 first = pts[0];
-            Vector3 last = pts[pts.Count - 1];
+            // Offset outward
+            Vector3 offset = p + faceNormal * offsetDistance;
 
-            // If last > first crosses a collider, remove last point
-            if (!SegmentIsClear(last, first, colliders))
-            {
-                pts.RemoveAt(pts.Count - 1);
-                changed = true;
-            }
+            debugNormalPoints.Add(offset);
+            NormalPoints.Add(offset);
         }
+    }
 
-        return pts;
+    List<Vector3> ComputeBisector(List<(Vector3 corner, Vector3 normalA, Vector3 normalB)> cornerData)
+    {
+        List<Vector3> bisectors = new List<Vector3>();
+
+        foreach (var data in cornerData)
+        {
+            Vector3 bisector = (data.normalA + data.normalB).normalized;
+            bisectors.Add(bisector);
+        }
+        return bisectors;
     }
 
     // VISUALIZER
-    // MARK: Create a LineRenderer to visualize the outline points
-    [SerializeField] float lineWidth = 0.1f;
-    [SerializeField] Color lineColor = Color.red;
-    [SerializeField] float lineLifetime = 0f;
-    void VisualizeOutline(List<Vector3> pts)
+    private void OnDrawGizmos()
     {
-        if (pts == null || pts.Count < 2) return;
+        foreach(var p in debugCornerPoints)
+        {
+            Gizmos.color = Color.yellow;
+            Gizmos.DrawSphere(p, 0.1f);
+        }
 
-        GameObject obj = new("OutlineVisualizer");
-        obj.transform.SetParent(transform);
-
-        LineRenderer lr = obj.AddComponent<LineRenderer>();
-        lr.useWorldSpace = true;
-        lr.loop = true;
-        lr.material = new Material(Shader.Find("Sprites/Default"));
-        lr.startColor = lr.endColor = lineColor;
-        lr.startWidth = lr.endWidth = lineWidth;
-        lr.positionCount = pts.Count;
-        lr.SetPositions(pts.ToArray());
-
-        if (lineLifetime > 0) Destroy(obj, lineLifetime);
+        foreach(var n in debugNormalPoints)
+        {
+            Gizmos.color = Color.red;
+            Gizmos.DrawSphere(n, 0.1f);
+        }
     }
 
 }
