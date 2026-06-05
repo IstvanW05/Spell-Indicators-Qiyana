@@ -29,8 +29,6 @@ public class SupremeDisplayOfTalentProjectile : MonoBehaviour
 
     public bool applyRoot = false;
 
-    private int activeCoroutines = 0;
-
     Vector3 impactPoint;
     Vector3 start;
     Vector3 end;
@@ -39,10 +37,13 @@ public class SupremeDisplayOfTalentProjectile : MonoBehaviour
     [SerializeField] float padding = 0.5f; // Max distance to consider colliders as "connected" in flood fill
 
     [SerializeField] List<Collider> visited = new List<Collider>();
+    public List<Vector3> outlinePoints = new List<Vector3>();
 
     public float mergeThreshold = 0.5f; // Distance threshold for merging nearby points in the outline
     public float sampleStep = 0.49f; // Distance between samples along collider edges (should be less than padding to ensure coverage)
     public float offsetDistance = .5f; // Distance to offset samples from collider edges
+
+    public float shockwaveDistPerSec = 5f;
 
 
     private void Start()
@@ -167,7 +168,7 @@ public class SupremeDisplayOfTalentProjectile : MonoBehaviour
         endpoint = start + aimDir * finalDis;
         this.end = endpoint;
 
-        StartTrackedCoroutine(PushArc(agent, endpoint));
+        StartCoroutine(PushArc(agent, endpoint));
     }
 
     IEnumerator PushArc(NavMeshAgent agent, Vector3 end)
@@ -211,18 +212,6 @@ public class SupremeDisplayOfTalentProjectile : MonoBehaviour
         }
 
         return -1f; // no wall in between
-    }
-
-    private void StartTrackedCoroutine(IEnumerator routine)
-    {
-        activeCoroutines++;
-        StartCoroutine(CoroutineWrapper(routine));
-    }
-
-    private IEnumerator CoroutineWrapper(IEnumerator routine)
-    {
-        yield return StartCoroutine(routine);
-        activeCoroutines--;
     }
 
     // Collect colliders
@@ -400,7 +389,9 @@ public class SupremeDisplayOfTalentProjectile : MonoBehaviour
         List<Vector3> debugCombined = debugCornerPoints.Concat(debugNormalPoints).ToList();
 
         List<Vector3> sorted = SortOutlinePoints(combined, colliders);
-        VisualizeOutline(sorted);
+        outlinePoints = sorted;
+
+        VisualizeOutline(outlinePoints);
     }
 
     [SerializeField] Vector3 startingPoint;
@@ -610,6 +601,19 @@ public class SupremeDisplayOfTalentProjectile : MonoBehaviour
         lr.positionCount = pts.Count;
         lr.SetPositions(pts.ToArray());
 
+        InitializeTerrainTrain(obj);
+
         if (lineLifetime > 0) Destroy(obj, lineLifetime);
+    }
+    void InitializeTerrainTrain(GameObject obj)
+    {
+        Debug.Log("Initializing TerrainTrain with " + outlinePoints.Count + " points.");
+        TerrainTrain train = obj.AddComponent<TerrainTrain>();
+
+        train.isBlue = isBlue;
+        train.spline = outlinePoints;
+        train.startingPoint = startingPoint;
+        train.distPerSec = shockwaveDistPerSec;
+
     }
 }

@@ -87,13 +87,19 @@ MonoBehaviour:
     m_Bits: 512
   padding: 0.5
   visited: []
+  outlinePoints: []
   mergeThreshold: 0.5
   sampleStep: 1
   offsetDistance: 1.5
+  shockwaveDistPerSec: 15
   CornerPoints: []
   NormalPoints: []
   debugCornerPoints: []
   debugNormalPoints: []
+  startingPoint: {x: 0, y: 0, z: 0}
+  lineWidth: 0.1
+  lineColor: {r: 1, g: 0, b: 0, a: 1}
+  lineLifetime: 0
 --- !u!65 &4493740036446871821
 BoxCollider:
   m_ObjectHideFlags: 0
