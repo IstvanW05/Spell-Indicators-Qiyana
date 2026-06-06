@@ -15,21 +15,25 @@ public class TerrainTrain : MonoBehaviour
     public List<Vector3> spline = new List<Vector3>();
 
     public bool isBlue = false;
-
+    GameObject trainRoot;
     private void Start()
     {
         trainA = Resources.Load<GameObject>("TrainA");
         trainB = Resources.Load<GameObject>("TrainB");
 
+        trainRoot = new GameObject("TrainRoot");
+
         if (trainA != null)
         {
             GameObject a = Instantiate(trainA, startingPoint, Quaternion.identity);
+            a.transform.SetParent(trainRoot.transform);
             StartCoroutine(MoveTrain(a));
         }
 
         if (trainB != null)
         {
             GameObject b = Instantiate(trainB, startingPoint, Quaternion.identity);
+            b.transform.SetParent(trainRoot.transform);
             StartCoroutine(MoveTrain(b));
         }
     }
@@ -48,6 +52,7 @@ public class TerrainTrain : MonoBehaviour
         foreach (Vector3 point in path)
         {
             obj.transform.LookAt(point); // Rotate the train to face the next point
+            float size = obj.GetComponent<Collider>().bounds.size.x;
 
             while (Vector3.Distance(obj.transform.position, point) > 0.1f)
             {
@@ -56,7 +61,14 @@ public class TerrainTrain : MonoBehaviour
                     point,
                     distPerSec * Time.deltaTime
                 );
-
+                if (Physics.Raycast(obj.transform.position, obj.transform.forward, out RaycastHit hit, size + 0.001f))
+                {
+                    if (hit.collider.gameObject.name.Contains("Train"))
+                    { 
+                        Destroy(trainRoot);
+                        Destroy(gameObject);
+                    }
+                }
                 yield return null;
             }
         }

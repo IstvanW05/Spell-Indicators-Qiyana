@@ -18,6 +18,8 @@ public class SupremeDisplayOfTalentProjectile : MonoBehaviour
     private int baseDamage;
     private int targetLayer;
 
+    private int enemiesBeingPushed = 0;
+
     public float travelSpeed;
     public float pushSpeed;
     public float pushHeight;
@@ -100,11 +102,6 @@ public class SupremeDisplayOfTalentProjectile : MonoBehaviour
         //Destroy(gameObject, lifetime);
     }
 
-    private void ElementContactAttributes()
-    {
-
-    }
-
     private void OnTriggerEnter(Collider other)
     {
 
@@ -117,6 +114,13 @@ public class SupremeDisplayOfTalentProjectile : MonoBehaviour
 
             StartFill(other);
 
+            if(enemiesBeingPushed > 0)
+            {
+                Debug.Log("Delaying projectile destruction due to active pushes: " + enemiesBeingPushed + " enemies being pushed.");
+                StartCoroutine(DelayedDestroy());
+            }
+            else
+                Destroy(gameObject);
         }
 
         if (other.gameObject.layer == targetLayer)
@@ -133,6 +137,7 @@ public class SupremeDisplayOfTalentProjectile : MonoBehaviour
 
                     if (other.gameObject.TryGetComponent<NavMeshAgent>(out NavMeshAgent agent))
                     {
+                        enemiesBeingPushed++;
                         TryPush(agent);
                     }
 
@@ -142,6 +147,16 @@ public class SupremeDisplayOfTalentProjectile : MonoBehaviour
         }
     }
 
+    IEnumerator DelayedDestroy()
+    {
+        yield return new WaitForSeconds(0.5f); // Check every 0.5 seconds, adjust as needed
+
+        while (enemiesBeingPushed > 0)
+        {
+            yield return null;
+        }
+        Destroy(gameObject);
+    }
     public void RegisterHitTarget(GameObject target)
     {
         if (target == null)
@@ -197,6 +212,7 @@ public class SupremeDisplayOfTalentProjectile : MonoBehaviour
 
         agent.Warp(agent.transform.position);
         agent.enabled = true;
+        enemiesBeingPushed--;
     }
     //TODO: Double check that this is working as intended, and that the raycast is starting outside the collider
     float GetObstacleDistance(Vector3 start, Vector3 end)
@@ -217,6 +233,7 @@ public class SupremeDisplayOfTalentProjectile : MonoBehaviour
     // Collect colliders
     void StartFill(Collider start)
     {
+        Debug.Log("Starting flood fill from collider: " + start.name);
         visited.Clear();
         FloodFill(start);
         //foreach (var col in visited)
@@ -590,7 +607,6 @@ public class SupremeDisplayOfTalentProjectile : MonoBehaviour
         if (pts == null || pts.Count < 2) return;
 
         GameObject obj = new("OutlineVisualizer");
-        obj.transform.SetParent(transform);
 
         LineRenderer lr = obj.AddComponent<LineRenderer>();
         lr.useWorldSpace = true;

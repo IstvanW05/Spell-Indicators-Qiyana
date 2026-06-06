@@ -334,8 +334,9 @@ public class Abilities : MonoBehaviour
         {
             Vector3 endpoint = start + aimDir * hopDistance;
 
-            if (IsValidPoint(endpoint))
+            if (IsValidPoint(endpoint) && !IsInsideObstacle(endpoint))
             {
+                // TODO: Make sure point is not inside an obstacle and is on the same level or lower than the player to prevent hopping into walls or up cliffs
                 //Debug.Log("Valid hop point found at distance: " + hopDistance);
                 StartCoroutine(HopArc(start, endpoint));
                 return;
@@ -683,6 +684,11 @@ public class Abilities : MonoBehaviour
         }
         return false;
     }
+    bool IsInsideObstacle(Vector3 point)
+    {
+        return Physics.CheckSphere(point, 0.2f, LayerMask.GetMask("Walls"));
+    }
+
 
     Quaternion GetAimDirection(Vector3 targetPos)
     {
